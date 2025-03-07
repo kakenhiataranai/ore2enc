@@ -6,15 +6,22 @@
 
 using namespace std;
 int main(int ac, char *av[]){
+ std::string dir;
  if(ac<2){cout<<"ore2enc FILENAME\n";return -1;}
-
- //ロード
- string data=binload(string(av[1]));
+ if(ac>=3){dir=std::string(av[2]);}
 
  //初期準備
  uint64_t filesize=get_file_size(std::string(av[1]));
  //Logistic写像と連分数の初期値
  double init=convertInt64ToNormalizedDouble(filesize);
+
+ double a_head=3.65432+init*0.34567;
+ std::vector<double> logistic_head=logistic_map(init, a_head, 1, 1024);
+ uint64_t headersize=static_cast<uint64_t>(65535*(1.+logistic_head[0]));
+
+ //ロード
+ string data=binload(string(av[1]),headersize);
+
  //Logistic写像の係数
  double a=3.6+init*0.4;
  int maxblock=20;//最大2^20まで
@@ -39,14 +46,18 @@ int main(int ac, char *av[]){
   //正方向の置換
   kekka=multi_reorder_by_ranks(data, ranks);
   o_filename=append_extension(av[1]);
-  binsave(kekka,o_filename);
  }
   //逆方向の置換
  else{
   ranks=reverse_ranks(ranks);
   kekka=multi_reorder_by_ranks(data, ranks);
   o_filename=remove_suffix(string(av[1]));
-  binsave(kekka,o_filename);
+ }
+
+ if(dir!=string("")){o_filename=dir+"/"+o_filename;}
+ binsave(kekka,o_filename);
+ if(filesize>headersize){
+  appendfile(string(av[1]), o_filename, headersize);
  }
 
  sync_file_timestamp(string(av[1]),o_filename);

@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 
 //binload
+/*
 std::string binload(const std::string& filename) {
  std::ifstream file(filename, std::ios::binary);
  if (!file) {
@@ -11,6 +12,29 @@ std::string binload(const std::string& filename) {
  buffer << file.rdbuf();
  return buffer.str();
 }
+*/
+
+std::string binload(const std::string& filename, uint64_t bytes) {
+ std::ifstream file(filename, std::ios::binary);
+ if (!file) {
+  std::cerr << "Error: Cannot open file " << filename << std::endl;
+  return "";
+ }
+
+ // ファイルサイズを取得
+ file.seekg(0, std::ios::end);
+ uint64_t filesize = file.tellg();
+ file.seekg(0, std::ios::beg);
+
+ // 読み込むバイト数を決定
+ uint64_t read_size = (bytes > filesize) ? filesize : bytes;
+
+ // 指定されたバイト数だけ読み込む
+ std::string buffer(read_size, '\0');
+ file.read(&buffer[0], read_size);
+ return buffer;
+}
+
 
 //ファイル名からファイルサイズを得て64bit整数で返す
 uint64_t get_file_size(const std::string& filename) {
@@ -118,6 +142,7 @@ std::vector<double> logistic_map(double init, double a, uint64_t len, uint64_t d
  }
  return sequence;
 }
+
 
 
 //生成されたlogistic実数列を分割する
@@ -243,6 +268,44 @@ std::string remove_suffix(const std::string& input) {
 }
 
 
+
+//filename1のサイズを調べ、inputsize より大きければ、その超過部分をfilename2の末尾に追加
+void appendfile(const std::string& filename1, const std::string& filename2, uint64_t inputsize) {
+ // ファイル1を開く（バイナリモードで読み取り専用）
+ std::ifstream file1(filename1, std::ios::binary);
+ if (!file1) {
+  std::cerr << "Error: Cannot open file " << filename1 << std::endl;
+  return;
+ }
+
+ // ファイル1のサイズを取得
+ file1.seekg(0, std::ios::end);
+ uint64_t filesize1 = file1.tellg();
+ if (filesize1 <= inputsize) {
+  std::cerr << "Info: File size of " << filename1 << " is not larger than " << inputsize << ". No data appended.\n";
+  return;
+ }
+
+ // 読み込むべきサイズを計算
+ uint64_t append_size = filesize1 - inputsize;
+
+ // ファイル1の読み込み位置をinputsizeの位置にセット
+ file1.seekg(inputsize, std::ios::beg);
+
+ // ファイル2を開く（バイナリモードで追記）
+ std::ofstream file2(filename2, std::ios::binary | std::ios::app);
+ if (!file2) {
+  std::cerr << "Error: Cannot open file " << filename2 << std::endl;
+  return;
+ }
+
+ // データをバッファに読み込んでファイル2へ書き込む
+ std::string buffer(append_size, '\0');
+ file1.read(&buffer[0], append_size);
+ file2.write(buffer.data(), append_size);
+}
+
+
 //ファイルのタイムスタンプを合わせる
 void sync_file_timestamp(const std::string& filename1, const std::string& filename2) {
 // filename1 の最終更新時刻を取得
@@ -250,3 +313,4 @@ void sync_file_timestamp(const std::string& filename1, const std::string& filena
  // filename2 の最終更新時刻を filename1 と同じに設定 
  std::filesystem::last_write_time(filename2, timestamp);
 }
+
