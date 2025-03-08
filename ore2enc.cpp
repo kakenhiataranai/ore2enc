@@ -7,7 +7,7 @@
 using namespace std;
 int main(int ac, char *av[]){
  std::string dir;
- if(ac<2){cout<<"ore2enc FILENAME\n";return -1;}
+ if(ac<2){cout<<"ore2enc filename [outputdirectory]\n";return -1;}
  if(ac>=3){dir=std::string(av[2]);}
 
  //初期準備
@@ -55,6 +55,8 @@ int main(int ac, char *av[]){
  }
 
  if(dir!=string("")){o_filename=dir+"/"+o_filename;}
+ std::string directory = getDirectoryPath(o_filename);
+ createDirectoryIfNotExists(directory);
  binsave(kekka,o_filename);
  if(filesize>headersize){
   appendfile(string(av[1]), o_filename, headersize);
