@@ -305,21 +305,11 @@ void appendfile(const std::string& filename1, const std::string& filename2, uint
  file2.write(buffer.data(), append_size);
 }
 
-
-#include <iostream>
-#include <filesystem>
-
 //ディレクトリがなければ作る
 void createDirectoryIfNotExists(const std::string& path) {
  std::filesystem::path dirPath(path);
  if (!std::filesystem::exists(dirPath)) {
-  if (std::filesystem::create_directories(dirPath)) {
-   std::cout << "Directories created: " << path << std::endl;
-  } else {
-   std::cerr << "Failed to create directories: " << path << std::endl;
-  }
- } else {
-  std::cout << "Directory already exists: " << path << std::endl;
+  std::filesystem::create_directories(dirPath);
  }
 }
 
@@ -331,7 +321,7 @@ std::string getDirectoryPath(const std::string& fullPath) {
 
 //ファイルのタイムスタンプを合わせる
 void sync_file_timestamp(const std::string& filename1, const std::string& filename2) {
-// filename1 の最終更新時刻を取得
+ // filename1 の最終更新時刻を取得
  std::filesystem::file_time_type timestamp = std::filesystem::last_write_time(filename1);
  // filename2 の最終更新時刻を filename1 と同じに設定 
  std::filesystem::last_write_time(filename2, timestamp);
